@@ -1,0 +1,54 @@
+name: CI & Verification
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Unit Tests & Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit test suite
+        run: npm test
+
+      - name: Verify build artifact is up-to-date
+        run: |
+          npm run build
+          if [ -n "$(git status --porcelain dist/)" ]; then
+            echo "Error: dist/index.js is out of sync with src/. Please run 'npm run build' and commit changes."
+            git status --porcelain dist/
+            exit 1
+          fi
+
+      - name: Live Test Free Kilo Inference (Graceful)
+        uses: ./
+        id: test_inference
+        with:
+          prompt: 'Echo test: reply with the word OK'
+          model: 'kilo-auto/free'
+          enforce_free: 'true'
+          fail_on_error: 'false'
+          max_tokens: '50'
+
+      - name: Check Output
+        run: |
+          echo "Inference success: ${{ steps.test_inference.outputs.success }}"
+          echo "Status: ${{ steps.test_inference.outputs.status }}"
+          echo "Model used: ${{ steps.test_inference.outputs.model_used }}"
+          echo "Response: ${{ steps.test_inference.outputs.response }}"

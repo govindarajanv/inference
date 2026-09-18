@@ -1,0 +1,33 @@
+{
+  "name": "inference",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "GitHub Action for AI inference utilizing free Kilo Gateway with graceful degradation",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.js -o dist --source-map --license licenses.txt",
+    "test": "node --test test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/govindarajanv/inference.git"
+  },
+  "keywords": [
+    "actions",
+    "github-actions",
+    "ai",
+    "inference",
+    "llm",
+    "kilo",
+    "kilo-gateway",
+    "free-tier"
+  ],
+  "author": "Govindarajan V <govindarajanv@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.11.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3"
+  }
+}

@@ -1,0 +1,93 @@
+name: 'inference'
+description: 'Fast, resilient AI inference utilizing free Kilo Gateway with automatic model fallback, retry backoff, and graceful failure handling.'
+author: 'govindarajanv'
+
+branding:
+  icon: 'zap'
+  color: 'blue'
+
+inputs:
+  prompt:
+    description: 'The prompt text to send to the model. Either prompt or messages is required.'
+    required: false
+    default: ''
+  system_prompt:
+    description: 'Optional system instructions / role prompt.'
+    required: false
+    default: ''
+  messages:
+    description: 'Optional raw OpenAI-format messages array in JSON format (e.g. [{"role":"user","content":"hello"}]).'
+    required: false
+    default: ''
+  model:
+    description: 'Target free model on Kilo Gateway (e.g., kilo-auto/free, stepfun/step-3.7-flash:free).'
+    required: false
+    default: 'kilo-auto/free'
+  fallback_models:
+    description: 'Comma-separated list of fallback free models to try if the primary model fails or is throttled.'
+    required: false
+    default: 'kilo-auto/free,deepseek/deepseek-v4-flash-0731:free,stepfun/step-3.7-flash:free,qwen/qwen3.8-27b:free,nvidia/nemotron-3-ultra-550b-a55b:free'
+  api_key:
+    description: 'Optional Kilo API key. Free models support anonymous access without requiring a key.'
+    required: false
+    default: ''
+  gateway_url:
+    description: 'Base URL for Kilo Gateway API.'
+    required: false
+    default: 'https://api.kilo.ai/api/gateway'
+  max_tokens:
+    description: 'Maximum tokens to generate.'
+    required: false
+    default: '1024'
+  temperature:
+    description: 'Sampling temperature between 0.0 and 2.0.'
+    required: false
+    default: '0.7'
+  max_retries:
+    description: 'Maximum retries per candidate model on rate limit (HTTP 429) or server errors (HTTP 5xx).'
+    required: false
+    default: '3'
+  retry_delay_ms:
+    description: 'Initial backoff delay in milliseconds between retries.'
+    required: false
+    default: '2000'
+  timeout_ms:
+    description: 'HTTP request timeout in milliseconds.'
+    required: false
+    default: '60000'
+  enforce_free:
+    description: 'Enforce that only free models can be invoked (guards against accidental paid charges).'
+    required: false
+    default: 'true'
+  fail_on_error:
+    description: 'Whether to fail the workflow step on limit exhaustion or throttling. When false, gracefully marks success=false with informative warnings.'
+    required: false
+    default: 'false'
+  save_to_file:
+    description: 'Optional file path to write the model output (e.g. ./output.md).'
+    required: false
+    default: ''
+
+outputs:
+  response:
+    description: 'The completion text response from the model.'
+  success:
+    description: 'Boolean ("true" or "false") indicating whether inference succeeded.'
+  status:
+    description: 'Status code ("success", "rate_limited", "timeout", "service_unavailable", "no_valid_free_models", "fatal_error").'
+  error:
+    description: 'Detailed error message if inference failed, or empty string on success.'
+  model_used:
+    description: 'The exact model that produced the successful completion.'
+  total_tokens:
+    description: 'Total token count used (prompt + completion).'
+  prompt_tokens:
+    description: 'Prompt tokens consumed.'
+  completion_tokens:
+    description: 'Completion tokens generated.'
+  finish_reason:
+    description: 'Model finish reason (e.g., stop, length).'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
